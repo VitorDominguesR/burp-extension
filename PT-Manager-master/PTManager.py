@@ -593,7 +593,8 @@ class BurpExtender(IBurpExtender, ITab, IMessageEditorController, AbstractTableM
         if self.reportType.getSelectedItem() == "XLSX":
             path = self.reportToXLS()
         if self.reportType.getSelectedItem() == "DOCX":
-            path = self.generateReportFromDocxTemplate('C:\\Program Files\\PT-Manager\\templates', "newfile.docx")
+            templates = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe()))) + "/templates"
+            path = self.generateReportFromDocxTemplate(templates, "newfile.docx")
         if self.reportType.getSelectedItem() == "XML":
             path = self.generateXMLReport()
 
@@ -1017,14 +1018,15 @@ class BurpExtender(IBurpExtender, ITab, IMessageEditorController, AbstractTableM
         """Do the escape of HTML characters to insert into HTML report"""
         return cgi.escape(data,quote=True)
 
-    def generateReportFromDocxTemplate(self, zipname, newZipName):
-        zipname = zipname + '\\Inicio_resumo.docx'
+    def generateReportFromDocxTemplate(self, templatePath, newZipName):
+        zipname = templatePath + '/Inicio_resumo.docx'
         filename = 'word/document.xml'
         newZipName = self.getCurrentProjPath() + "/" + newZipName
         with zipfile.ZipFile(zipname, 'r') as zin:
             with zipfile.ZipFile(newZipName, 'w') as zout:
                 zout.comment = zin.comment
                 for item in zin.infolist():
+                    print item.filename
                     if item.filename != filename:
                         zout.writestr(item, zin.read(item.filename))
                     else:
@@ -1038,32 +1040,41 @@ class BurpExtender(IBurpExtender, ITab, IMessageEditorController, AbstractTableM
                         vulnerabilidades = self.sortVul(self._log)
 
                         for i in range(0, len(vulnerabilidades)):
-                            template = 'C:\\Program Files\\PT-Manager\\templates\\' + vulnerabilidades[i][0].getSeverity() + '.docx'
+                            template = templatePath + '/' + vulnerabilidades[i][0].getSeverity() + '.docx'
+                            resumo = templatePath + '/resumo_' + vulnerabilidades[i][0].getSeverity() + '.docx'
                             with zipfile.ZipFile(template, 'r') as ztemp:
                                 for item in ztemp.infolist():
                                     if item.filename == filename:
                                         xml_content = ztemp.read(item.filename)
                                         result = re.findall("(.*)<w:body>(?:.*)<\/w:body>(.*)", xml_content)[0]
-                                        #newXML = result[0]
                                         templateBody = re.findall("<w:body>(.*)<\/w:body>", xml_content)[0]
 
                                         tmp = templateBody.decode('utf-8')
                                         tmp = tmp.replace("Titulo_vulnerabilidade", vulnerabilidades[i][0].getName())
-                                        tmp = tmp.replace("Numero_CWE", self.htmlEscape(vulnerabilidades[i][0].getCWENumber()))
-                                        tmp = tmp.replace("Titulo_CWE", self.htmlEscape(vulnerabilidades[i][0].getCWETitle()))
-                                        tmp = tmp.replace("Descricao", self.htmlEscape(vulnerabilidades[i][0].getDescription()))
-                                        tmp = tmp.replace("Mitigacoes", self.htmlEscape(vulnerabilidades[i][0].getMitigation()))
+                                        tmp = tmp.replace("Numero_CWE",
+                                                          self.htmlEscape(vulnerabilidades[i][0].getCWENumber()))
+                                        tmp = tmp.replace("Titulo_CWE",
+                                                          self.htmlEscape(vulnerabilidades[i][0].getCWETitle()))
+                                        tmp = tmp.replace("Descricao",
+                                                          self.htmlEscape(vulnerabilidades[i][0].getDescription()))
+                                        tmp = tmp.replace("Mitigacoes",
+                                                          self.htmlEscape(vulnerabilidades[i][0].getMitigation()))
                                         tmp = tmp.replace("Riscos", self.htmlEscape(vulnerabilidades[i][0].getRisk()))
-                                        tmp = tmp.replace("Referencias", self.htmlEscape(vulnerabilidades[i][0].getReferences()))
+                                        tmp = tmp.replace("Referencias",
+                                                          self.htmlEscape(vulnerabilidades[i][0].getReferences()))
                                         newBody = newBody + tmp
+
+                            with zipfile.ZipFile(resumo, 'r') as zres:
+                                for item in zres.infolist():
+                                    if item.filename == filename:
+                                        xml_content = zres.read(item.filename)
+                                        result = re.findall("(.*)<w:body>(?:.*)<\/w:body>(.*)", xml_content)[0]
+                                        templateBody = re.findall("<w:body>(.*)<\/w:body>", xml_content)[0]
+                                        tmp = templateBody.decode('utf-8')
+                                        newXML = newXML + tmp
 
                         newXML = newXML + newBody
                         newXML = newXML + result[1]
-
-                        #print newXML
-
-
-
 
         with zipfile.ZipFile(newZipName, mode='a', compression=zipfile.ZIP_DEFLATED) as zf:
             zf.writestr(filename, newXML.encode('utf-8'))
