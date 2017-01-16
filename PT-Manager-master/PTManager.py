@@ -1350,7 +1350,7 @@ class BurpExtender(IBurpExtender, ITab, IMessageEditorController, AbstractTableM
             self.loadVulnerabilities(self.getCurrentProjPath())
             pass
         elif boolRepo:
-            #print "teste"
+            print "teste"
             self.popup("Vulnerability created")
             pass
         else:
