@@ -196,13 +196,13 @@ class BurpExtender(IBurpExtender, ITab, IMessageEditorController, AbstractTableM
         descriptionLabel = JLabel("Description:")
         descriptionLabel.setBounds(10, 140, 100, 30)
 
-        riskLabel = JLabel("Risco:")
+        riskLabel = JLabel("Risk:")
         riskLabel.setBounds(10, 240, 150, 30)
 
-        cweNumberLabel = JLabel("Numero CWE:")
+        cweNumberLabel = JLabel("Number CWE:")
         cweNumberLabel.setBounds(10, 80, 150, 30)
 
-        cweTitleLabel = JLabel("Titulo CWE:")
+        cweTitleLabel = JLabel("Title CWE:")
         cweTitleLabel.setBounds(10, 120, 150, 30)
 
         self.cwe_vuln ='' # ver aqui
