@@ -673,7 +673,7 @@ class BurpExtender(IBurpExtender, ITab, IMessageEditorController, AbstractTableM
             references = references.split()
             cweNum = u"%s"%str(self._log.get(i).getCWENumber())
             affectedUrlList = [u"%s"%x for x in self._log.get(i).getAffectedURL().split()]
-            severity = {"Unclassified":"informativa", "Critical":"Crítica", "High":"Alta", "Medium":"Média", "Low":"Baixa"}
+            severity = {"Unclassified":u"informativa", "Critical":u"Crítica", "High":u"Alta", "Medium":u"Média", "Low":u"Baixa"}
 
             vulnDict = {'cwe': cweNum, 'nome_vuln': name,
                         'severidade': severity[self._log.get(i).getSeverity()],
@@ -683,12 +683,10 @@ class BurpExtender(IBurpExtender, ITab, IMessageEditorController, AbstractTableM
                         'recomendacao': mitigation,
                         'referencias': references}
 
-
-        # print vulnDict['descricao'].encode('utf8')
+            # print vulnDict['descricao'].encode('utf8')
             self.vetorVuln.append(vulnDict)
-            #print self.vetorVuln
+            # print self.vetorVuln
         return self.vetorVuln
-
 
 
     def exportProj(self, event):
@@ -1112,7 +1110,6 @@ class BurpExtender(IBurpExtender, ITab, IMessageEditorController, AbstractTableM
             try:
                 testeDir = u"%s" % self.chooser.getSelectedFile().getAbsolutePath()
                 projPath = testeDir.encode('latin1') + "/PTManager"
-                print projPath
                 if not os.path.exists(projPath):
                     os.makedirs(projPath)
                 else:
