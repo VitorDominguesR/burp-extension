@@ -619,34 +619,37 @@ class BurpExtender(IBurpExtender, ITab, IMessageEditorController, AbstractTableM
                 tag_cwenum.text = vulnerabilidade['cwe'].decode('latin1')
                 tag_nomevuln = ET.SubElement(tag_vuln, 'nome')
                 tag_nomevuln.text = vulnerabilidade['nome_vuln'].decode('latin1')
+                #tag_severidade = ET.SubElement(tag_vuln, 'severidade')
+                #tag_severidade.text = vulnerabilidade['severidade'].decode('latin1')
                 tag_urls = ET.SubElement(tag_vuln, 'urls')
                 for url in vulnerabilidade['url_afetada']:  # vetor
                     tag_url = ET.SubElement(tag_urls, 'url')
                     tag_url.text = url.decode('utf8')
                 tag_descricao = ET.SubElement(tag_vuln, 'descricao')
-                tag_descricao.text = vulnerabilidade['descricao'].decode('latin1')
+                tag_descricao.text = vulnerabilidade['descricao']
                 tag_risco = ET.SubElement(tag_vuln, 'risco')
-                tag_risco.text = vulnerabilidade['risco'].decode('latin1')
+                tag_risco.text = vulnerabilidade['risco']
                 tag_resultados = ET.SubElement(tag_vuln, 'resultados')
                 for imagem, texto in vulnerabilidade['resultados']:  # vetor de tuplas
                     tag_imagem = ET.SubElement(tag_resultados, 'imagem')
-                    tag_imagem.text = imagem.decode('latin1')
+                    tag_imagem.text = imagem
                     tag_textoimg = ET.SubElement(tag_resultados, 'texto')
-                    tag_textoimg.text = texto.decode('latin1')
+                    tag_textoimg.text = texto
                 tag_recomendacao = ET.SubElement(tag_vuln, 'recomendacao')
-                tag_recomendacao.text = vulnerabilidade['recomendacao'].decode('latin1')
+                tag_recomendacao.text = vulnerabilidade['recomendacao']
                 tag_referencias = ET.SubElement(tag_vuln, 'referencias')
                 for links in vulnerabilidade['referencias']:  # vetor
                     tag_referencia = ET.SubElement(tag_referencias, 'referencia')
-                    tag_referencia.text = links.decode('latin1')
+                    tag_referencia.text = links
             # tree = ET.ElementTree(tag_relatorio)
             # tree.write('xml_marotao.xml')
+
             xmlstr = ET.tostring(tag_relatorio, method='xml')
             xml = minidom.parseString(xmlstr)  # or xml.dom.minidom.parseString(xml_string)
             xmlDirReport = self.getCurrentProjPath() + '/' + self.projName.getText() + '.xml'
             with codecs.open(xmlDirReport, 'w', 'utf8') as xml_file:
                 xml_file.write(xml.toprettyxml())
-            # print xml.toprettyxml()
+            #print xml.toprettyxml()
             return xmlDirReport
         except:
             self.popup('Não gerou o XML')
@@ -663,24 +666,27 @@ class BurpExtender(IBurpExtender, ITab, IMessageEditorController, AbstractTableM
                         img_and_text.append((fileName, fileName)) #filename é a variavel que dá o nome a imagem
             except Exception as e:
                 pass
-            description = self._log.get(i).getDescription()
-            description = self.htmlEscape(description)
-            mitigation = self.htmlEscape(self._log.get(i).getMitigation())
-            risk = self.htmlEscape(self._log.get(i).getRisk())
-            references = self.htmlEscape(self._log.get(i).getReferences())
+            description = u"%s"%self._log.get(i).getDescription()
+            mitigation = u"%s"%self._log.get(i).getMitigation()
+            risk = u"%s"%self._log.get(i).getRisk()
+            references = u"%s"%self._log.get(i).getReferences()
             references = references.split()
-            cweNum = str(self._log.get(i).getCWENumber())
-            affectedUrlList = self._log.get(i).getAffectedURL().split()
+            cweNum = u"%s"%str(self._log.get(i).getCWENumber())
+            affectedUrlList = [u"%s"%x for x in self._log.get(i).getAffectedURL().split()]
+            severity = {"Unclassified":"informativa", "Critical":"Crítica", "High":"Alta", "Medium":"Média", "Low":"Baixa"}
 
             vulnDict = {'cwe': cweNum, 'nome_vuln': name,
+                        'severidade': severity[self._log.get(i).getSeverity()],
                         'url_afetada': affectedUrlList, 'descricao': description,
                         'risco':risk,
                         'resultados': img_and_text,
                         'recomendacao': mitigation,
                         'referencias': references}
 
+
         # print vulnDict['descricao'].encode('utf8')
             self.vetorVuln.append(vulnDict)
+            #print self.vetorVuln
         return self.vetorVuln
 
 
