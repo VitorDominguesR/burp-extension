@@ -619,8 +619,8 @@ class BurpExtender(IBurpExtender, ITab, IMessageEditorController, AbstractTableM
                 tag_cwenum.text = vulnerabilidade['cwe'].decode('latin1')
                 tag_nomevuln = ET.SubElement(tag_vuln, 'nome')
                 tag_nomevuln.text = vulnerabilidade['nome_vuln'].decode('latin1')
-                #tag_severidade = ET.SubElement(tag_vuln, 'severidade')
-                #tag_severidade.text = vulnerabilidade['severidade'].decode('latin1')
+                tag_severidade = ET.SubElement(tag_vuln, 'severidade')
+                tag_severidade.text = vulnerabilidade['severidade'].decode('latin1')
                 tag_urls = ET.SubElement(tag_vuln, 'urls')
                 for url in vulnerabilidade['url_afetada']:  # vetor
                     tag_url = ET.SubElement(tag_urls, 'url')
