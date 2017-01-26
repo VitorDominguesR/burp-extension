@@ -1023,7 +1023,7 @@ class BurpExtender(IBurpExtender, ITab, IMessageEditorController, AbstractTableM
         return cgi.escape(data,quote=True)
 
 
-        def generateReportFromDocxTemplate(self, templatePath, newZipName):
+    def generateReportFromDocxTemplate(self, templatePath, newZipName):
         zipname = templatePath + '/Inicio_resumo.docx'
         filename = 'word/document.xml'
         newZipName = self.getCurrentProjPath() + "/" + newZipName
