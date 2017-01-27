@@ -1031,16 +1031,12 @@ class BurpExtender(IBurpExtender, ITab, IMessageEditorController, AbstractTableM
             with zipfile.ZipFile(newZipName, 'w') as zout:
                 zout.comment = zin.comment
                 vulnerabilidades = self.sortVul(self._log)
-                self.saveImages(zin, zout, vulnerabilidades)
+                #self.saveImages(zin, zout, vulnerabilidades)
 
                 for item in zin.infolist():
                     #print item.filename
                     if item.filename != filename:
-                        if item.filename == 'word/_rels/document.xml.rels':
-                            #zout.writestr(item, zin.read(item.filename))
-                            pass
-                        else:
-                            zout.writestr(item, zin.read(item.filename))
+                        zout.writestr(item, zin.read(item.filename))
                     else:
                         xml_content = zin.read(item.filename)
                         result = re.findall("(.*)<w:body>(?:.*)<\/w:body>(.*)", xml_content)[0]
@@ -1048,8 +1044,8 @@ class BurpExtender(IBurpExtender, ITab, IMessageEditorController, AbstractTableM
                         templateBody = re.findall("<w:body>(.*)<\/w:body>", xml_content)[0]
                         newBody = ""
                         newXML = newXML + templateBody.decode('utf-8')
-
-
+                        newXML = newXML.replace("Aplicacao", self.projName.getText())
+                        contadores = [0, 0, 0, 0, 0]
 
                         for i in range(0, len(vulnerabilidades)):
                             template = templatePath + '/' + vulnerabilidades[i][0].getSeverity() + '.docx'
@@ -1074,9 +1070,22 @@ class BurpExtender(IBurpExtender, ITab, IMessageEditorController, AbstractTableM
                                         tmp = tmp.replace("Riscos", self.htmlEscape(vulnerabilidades[i][0].getRisk()))
                                         tmp = tmp.replace("Referencias",
                                                           self.htmlEscape(vulnerabilidades[i][0].getReferences()))
-                                        # ibagem = '<w:p w:rsidR="004D3930" w:rsidRDefault="004D3930" w:rsidP="004D3930"><w:pPr><w:rPr><w:b/></w:rPr></w:pPr></w:p><w:p w:rsidR="004D3930" w:rsidRDefault="004D3930" w:rsidP="004D3930"><w:pPr><w:keepNext/><w:jc w:val="center"/></w:pPr><w:r><w:rPr><w:b/><w:noProof/><w:lang w:eastAsia="pt-BR"/></w:rPr><w:drawing><wp:inline distT="0" distB="0" distL="0" distR="0" wp14:anchorId="228CCA13" wp14:editId="0E30EDDB"><wp:extent cx="2664059" cy="1990725"/><wp:effectExtent l="19050" t="19050" r="22225" b="9525"/><wp:docPr id="7" name="Imagem 7" descr="C:\Users\JCBJVGL\Desktop\Sem título.png"/><wp:cNvGraphicFramePr><a:graphicFrameLocks xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" noChangeAspect="1"/></wp:cNvGraphicFramePr><a:graphic xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main"><a:graphicData uri="http://schemas.openxmlformats.org/drawingml/2006/picture"><pic:pic xmlns:pic="http://schemas.openxmlformats.org/drawingml/2006/picture"><pic:nvPicPr><pic:cNvPr id="0" name="Picture 1" descr="C:\Users\JCBJVGL\Desktop\Sem título.png"/><pic:cNvPicPr><a:picLocks noChangeAspect="1" noChangeArrowheads="1"/></pic:cNvPicPr></pic:nvPicPr><pic:blipFill rotWithShape="1"><a:blip r:embed="rId17"><a:extLst><a:ext uri="{28A0092B-C50C-407E-A947-70E740481C1C}"><a14:useLocalDpi xmlns:a14="http://schemas.microsoft.com/office/drawing/2010/main" val="0"/></a:ext></a:extLst></a:blip><a:srcRect r="17648" b="11689"/><a:stretch/></pic:blipFill><pic:spPr bwMode="auto"><a:xfrm><a:off x="0" y="0"/><a:ext cx="2668992" cy="1994412"/></a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom><a:noFill/><a:ln w="9525" cap="flat" cmpd="sng" algn="ctr"><a:solidFill><a:schemeClr val="accent2"/></a:solidFill><a:prstDash val="solid"/><a:round/><a:headEnd type="none" w="med" len="med"/><a:tailEnd type="none" w="med" len="med"/></a:ln><a:extLst><a:ext uri="{53640926-AAD7-44D8-BBD7-CCE9431645EC}"><a14:shadowObscured xmlns:a14="http://schemas.microsoft.com/office/drawing/2010/main"/></a:ext></a:extLst></pic:spPr></pic:pic></a:graphicData></a:graphic></wp:inline></w:drawing></w:r></w:p>'
-                                        # ibagem = ibagem.replace('rId17', 'rId20')
-                                        # tmp = tmp.replace('IBAGENS', ibagem)
+
+                                        if vulnerabilidades[i][0].getSeverity() == "Critical":
+                                            contadores[0] += 1
+                                        else:
+                                            if vulnerabilidades[i][0].getSeverity() == "High":
+                                                contadores[1] += 1
+                                            else:
+                                                if vulnerabilidades[i][0].getSeverity() == "Medium":
+                                                    contadores[2] += 1
+                                                else:
+                                                    if vulnerabilidades[i][0].getSeverity() == "Low":
+                                                        contadores[3] += 1
+                                                    else:
+                                                        if vulnerabilidades[i][0].getSeverity() == "Unclassified":
+                                                            contadores[4] += 1
+
                                         newBody = newBody + tmp
 
                             with zipfile.ZipFile(resumo, 'r') as zres:
@@ -1086,7 +1095,14 @@ class BurpExtender(IBurpExtender, ITab, IMessageEditorController, AbstractTableM
                                         result = re.findall("(.*)<w:body>(?:.*)<\/w:body>(.*)", xml_content)[0]
                                         templateBody = re.findall("<w:body>(.*)<\/w:body>", xml_content)[0]
                                         tmp = templateBody.decode('utf-8')
+                                        tmp = tmp.replace("Titulo", vulnerabilidades[i][0].getName())
                                         newXML = newXML + tmp
+
+                        newXML = newXML.replace("$$C", str(contadores[0]))
+                        newXML = newXML.replace("$$H", str(contadores[1]))
+                        newXML = newXML.replace("$$M", str(contadores[2]))
+                        newXML = newXML.replace("$$B", str(contadores[3]))
+                        newXML = newXML.replace("$$U", str(contadores[4]))
 
                         zipname = templatePath + '/Inicio_continuacao.docx'
                         with zipfile.ZipFile(zipname, 'r') as zres:
