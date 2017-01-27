@@ -670,7 +670,7 @@ class BurpExtender(IBurpExtender, ITab, IMessageEditorController, AbstractTableM
             mitigation = u"%s"%self._log.get(i).getMitigation()
             risk = u"%s"%self._log.get(i).getRisk()
             references = u"%s"%self._log.get(i).getReferences()
-            references = references.split()
+            references = references.split('\n')
             cweNum = u"%s"%str(self._log.get(i).getCWENumber())
             affectedUrlList = [u"%s"%x for x in self._log.get(i).getAffectedURL().split()]
             severity = {"Unclassified":u"informativa", "Critical":u"Crítica", "High":u"Alta", "Medium":u"Média", "Low":u"Baixa"}
@@ -1352,7 +1352,7 @@ class BurpExtender(IBurpExtender, ITab, IMessageEditorController, AbstractTableM
 
         vulnPath = self.projPath.getText() + "/" + self.clearStr(self.vulnName.getText())
         vulnDirPath = self.vulnsPathLabel.getText() + "/" + self.clearStr(self.vulnName.getText())
-        print vulnDirPath
+        #print vulnDirPath
         if not os.path.exists(vulnPath) and not boolRepo:
             os.makedirs(vulnPath)
         if not os.path.exists(vulnDirPath):
