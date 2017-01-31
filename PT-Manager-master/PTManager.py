@@ -632,9 +632,9 @@ class BurpExtender(IBurpExtender, ITab, IMessageEditorController, AbstractTableM
                 tag_resultados = ET.SubElement(tag_vuln, 'resultados')
                 for imagem, texto in vulnerabilidade['resultados']:  # vetor de tuplas
                     tag_imagem = ET.SubElement(tag_resultados, 'imagem')
-                    tag_imagem.text = imagem
+                    tag_imagem.text = imagem.lower()
                     tag_textoimg = ET.SubElement(tag_resultados, 'texto')
-                    tag_textoimg.text = texto
+                    tag_textoimg.text = texto.lower()
                 tag_recomendacao = ET.SubElement(tag_vuln, 'recomendacao')
                 tag_recomendacao.text = vulnerabilidade['recomendacao']
                 tag_referencias = ET.SubElement(tag_vuln, 'referencias')
@@ -646,7 +646,7 @@ class BurpExtender(IBurpExtender, ITab, IMessageEditorController, AbstractTableM
 
             xmlstr = ET.tostring(tag_relatorio, method='xml')
             xml = minidom.parseString(xmlstr)  # or xml.dom.minidom.parseString(xml_string)
-            xmlDirReport = self.getCurrentProjPath() + '/' + self.projName.getText() + '.xml'
+            xmlDirReport = self.getCurrentProjPath() + '/' + self.projName.getText().lower() + '.xml'
             with codecs.open(xmlDirReport, 'w', 'utf8') as xml_file:
                 xml_file.write(xml.toprettyxml())
             #print xml.toprettyxml()
