@@ -1316,7 +1316,7 @@ class BurpExtender(IBurpExtender, ITab, IMessageEditorController, AbstractTableM
         if not os.path.exists(vulnPath):
             os.makedirs(vulnPath)
         name = self.clearStr(self.vulnName.getText()) + str(random.randint(1, 99999)) + ".jpg"
-        fileName = self.projPath.getText() + "/" + self.clearStr(self.vulnName.getText()) + "/" + name
+        fileName = self.projPath.getText() + "/" + self.clearStr(self.vulnName.getText()) + "/" + name.lower()
         file = File(fileName)
         bufferedImage = BufferedImage(image.getWidth(None), image.getHeight(None), BufferedImage.TYPE_INT_RGB);
         g = bufferedImage.createGraphics();
