@@ -1028,7 +1028,7 @@ class BurpExtender(IBurpExtender, ITab, IMessageEditorController, AbstractTableM
 
 
     def generateReportFromDocxTemplate(self, templatePath, newZipName):
-        zipname = templatePath + '/Inicio_resumo.docx'
+        zipname = templatePath + '/Inicio.docx'
         filename = 'word/document.xml'
         newZipName = self.getCurrentProjPath() + "/" + newZipName
         with zipfile.ZipFile(zipname, 'r') as zin:
