@@ -207,15 +207,11 @@ class BurpExtender(IBurpExtender, ITab, IMessageEditorController, AbstractTableM
 
         self.cwe_vuln ='' # ver aqui
         self.cweNumberStr = JTextField("CWE-")
-        #self.cweStr.setWrapStyleWord(True);
-        #self.cweStr.setLineWrap(True)
-        self.cweNumberStr.setBounds(85, 80, 100, 30)
-        #cweStringScroll = JScrollPane(self.cweStr)
-        #cweStringScroll.setBounds(10, 110, 555, 30)
-        #cweStringScroll.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED)
+
+        self.cweNumberStr.setBounds(140, 80, 100, 30)
 
         self.cweTitleStr = JTextField("")
-        self.cweTitleStr.setBounds(70, 120, 350, 30)
+        self.cweTitleStr.setBounds(140, 120, 350, 30)
 
         self.risk_vuln ='' # ver aqui
         self.riskStr = JTextArea('', 5, 30)
@@ -557,7 +553,6 @@ class BurpExtender(IBurpExtender, ITab, IMessageEditorController, AbstractTableM
             if vulnName == self.vulnName.getText():
                 self.logTable.setRowSelectionInterval(row, row)
                 selected = True
-
 
     def createSection(self, sectioName):
         self.config.read('config.ini')
