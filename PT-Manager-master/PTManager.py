@@ -1069,6 +1069,7 @@ class BurpExtender(IBurpExtender, ITab, IMessageEditorController, AbstractTableM
                                         tmp = tmp.replace("Riscos", self.htmlEscape(vulnerabilidades[i][0].getRisk()))
                                         tmp = tmp.replace("Referencias",
                                                           self.htmlEscape(vulnerabilidades[i][0].getReferences()))
+                                        tmp = tmp.replace("URL", self.htmlEscape(vulnerabilidades[i][0].getAffectedURL()))
 
                                         if vulnerabilidades[i][0].getSeverity() == "Critical":
                                             contadores[0] += 1
@@ -1095,6 +1096,7 @@ class BurpExtender(IBurpExtender, ITab, IMessageEditorController, AbstractTableM
                                         templateBody = re.findall("<w:body>(.*)<\/w:body>", xml_content)[0]
                                         tmp = templateBody.decode('utf-8')
                                         tmp = tmp.replace("Titulo", vulnerabilidades[i][0].getName())
+                                        tmp = tmp.replace("Riscos", vulnerabilidades[i][0].getRisk())
                                         newXML = newXML + tmp
 
                         newXML = newXML.replace("$$C", str(contadores[0]))
