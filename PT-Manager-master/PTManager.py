@@ -1175,7 +1175,8 @@ class BurpExtender(IBurpExtender, ITab, IMessageEditorController, AbstractTableM
 
     def loadVulnPath(self):
         try:
-            vulnDirPath = self.config.get('vulnerability path','vulnDirPath')
+            vulnDirPath = u"%s"%self.config.get('vulnerability path','vulnDirPath')
+            vulnDirPath = vulnDirPath.encode('utf8')
             self.vulnsPathLabel.setText(vulnDirPath)
             self.vulnsInDirList.removeAllItems();
             self.vulnsPathLabel.setText(vulnDirPath)
