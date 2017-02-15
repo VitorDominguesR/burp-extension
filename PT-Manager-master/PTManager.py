@@ -3,6 +3,7 @@ import os, zipfile, shutil, inspect, random, sys, re, subprocess, platform, errn
 import xml.etree.ElementTree as ET
 import codecs
 import cgi
+import time
 from distutils.dir_util import copy_tree
 from xml.dom import minidom
 
@@ -1044,6 +1045,15 @@ class BurpExtender(IBurpExtender, ITab, IMessageEditorController, AbstractTableM
                         newBody = ""
                         newXML = newXML + templateBody.decode('utf-8')
                         newXML = newXML.replace("Aplicacao", self.projName.getText())
+
+                        document = self.getXMLDoc(self.getCurrentProjPath() + "/project.xml")
+                        nodeList = document.getDocumentElement().getChildNodes()
+                        start = str(nodeList.item(4).getTextContent())
+                        print start
+                        newXML = newXML.replace("DD/MM/AA1", start)
+                        newXML = newXML.replace("DD/MM/AA2", time.strftime("%d/%m/%Y"))
+
+
                         contadores = [0, 0, 0, 0, 0]
 
                         for i in range(0, len(vulnerabilidades)):
@@ -1261,11 +1271,13 @@ class BurpExtender(IBurpExtender, ITab, IMessageEditorController, AbstractTableM
         path = ET.SubElement(xml, "path")
         details = ET.SubElement(xml, "details")
         autoSaveMode = ET.SubElement(xml, "autoSaveMode")
+        start = ET.SubElement(xml, "start")
 
         name.text = self.projName.getText()
         path.text = projPath
         details.text = self.projDetails.getText()
         autoSaveMode.text = str(self.autoSave.isSelected())
+        start.text = time.strftime("%d/%m/%Y")
         tree = ET.ElementTree(xml)
         try:
             tree.write(self.getCurrentProjPath() + '/project.xml')
@@ -1313,11 +1325,12 @@ class BurpExtender(IBurpExtender, ITab, IMessageEditorController, AbstractTableM
         vulnPath = self.projPath.getText() + "/" + self.clearStr(self.vulnName.getText())
         if not os.path.exists(vulnPath):
             os.makedirs(vulnPath)
-        name = self.clearStr(self.vulnName.getText()) + str(random.randint(1, 99999)) + ".jpg"
+        name = self.clearStr(self.vulnName.getText()) + str(time.strftime("%H%M%S")) + ".jpg"
         fileName = self.projPath.getText() + "/" + self.clearStr(self.vulnName.getText()) + "/" + name.lower()
         file = File(fileName)
         bufferedImage = BufferedImage(image.getWidth(None), image.getHeight(None), BufferedImage.TYPE_INT_RGB);
         g = bufferedImage.createGraphics();
+
         g.drawImage(image, 0, 0, bufferedImage.getWidth(), bufferedImage.getHeight(), Color.WHITE, None);
         ImageIO.write(bufferedImage, "jpg", file)
         self.addVuln(None)
