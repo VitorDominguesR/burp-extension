@@ -1031,13 +1031,20 @@ class BurpExtender(IBurpExtender, ITab, IMessageEditorController, AbstractTableM
             with zipfile.ZipFile(newZipName, 'w') as zout:
                 zout.comment = zin.comment
                 vulnerabilidades = self.sortVul(self._log)
-                #self.saveImages(zin, zout, vulnerabilidades)
 
                 for item in zin.infolist():
                     #print item.filename
+                    if item.filename == 'word/_rels/document.xml.rels':
+                        #evidencias = self.saveImages(zin, zout, vulnerabilidades, templatePath)
+                        #vuln = 0
+                        continue
                     if item.filename != filename:
                         zout.writestr(item, zin.read(item.filename))
                     else:
+
+                        evidencias = self.saveImages(zin, zout, vulnerabilidades, templatePath)
+                        vuln = 0
+
                         xml_content = zin.read(item.filename)
                         result = re.findall("(.*)<w:body>(?:.*)<\/w:body>(.*)", xml_content)[0]
                         newXML = result[0]
@@ -1049,10 +1056,11 @@ class BurpExtender(IBurpExtender, ITab, IMessageEditorController, AbstractTableM
                         document = self.getXMLDoc(self.getCurrentProjPath() + "/project.xml")
                         nodeList = document.getDocumentElement().getChildNodes()
                         start = str(nodeList.item(4).getTextContent())
-                        print start
                         newXML = newXML.replace("DD/MM/AA1", start)
                         newXML = newXML.replace("DD/MM/AA2", time.strftime("%d/%m/%Y"))
 
+                        #with open(str(templatePath + '/' + 'images.xml'), 'r') as imageXML:
+                        #    imageText = imageXML.read()
 
                         contadores = [0, 0, 0, 0, 0]
 
@@ -1080,6 +1088,7 @@ class BurpExtender(IBurpExtender, ITab, IMessageEditorController, AbstractTableM
                                         tmp = tmp.replace("Referencias",
                                                           self.htmlEscape(vulnerabilidades[i][0].getReferences()))
                                         tmp = tmp.replace("URL", self.htmlEscape(vulnerabilidades[i][0].getAffectedURL()))
+                                        tmp = tmp.replace("IMAGEM", evidencias[vuln] + "IMAGEM")
 
                                         if vulnerabilidades[i][0].getSeverity() == "Critical":
                                             contadores[0] += 1
@@ -1108,6 +1117,9 @@ class BurpExtender(IBurpExtender, ITab, IMessageEditorController, AbstractTableM
                                         tmp = tmp.replace("Titulo", vulnerabilidades[i][0].getName())
                                         tmp = tmp.replace("Riscos", vulnerabilidades[i][0].getRisk())
                                         newXML = newXML + tmp
+
+                            newBody = newBody.replace("IMAGEM", "")
+                            vuln += 1
 
                         newXML = newXML.replace("$$C", str(contadores[0]))
                         newXML = newXML.replace("$$H", str(contadores[1]))
@@ -1139,10 +1151,46 @@ class BurpExtender(IBurpExtender, ITab, IMessageEditorController, AbstractTableM
 
                         newXML = newXML + result[1]
 
+
+
         with zipfile.ZipFile(newZipName, mode='a', compression=zipfile.ZIP_DEFLATED) as zf:
             zf.writestr(filename, newXML.encode('utf-8'))
 
+
+
         return newZipName
+
+    def saveImages(self, zin, zout, vulnerabilidades, templatePath):
+        filename = 'word/media/'
+        num = 17
+        relsFile = 'word/_rels/document.xml.rels'
+        rels = zin.read(relsFile)
+        evidencias = []
+        i = 0
+
+        with open(str(templatePath + '/' + 'images.xml'), 'r') as imageXML:
+            imageText = imageXML.read()
+
+        for vulnerabilidade in vulnerabilidades:
+            vulName = self.clearStr(vulnerabilidade[0].getName())
+            imagePath = self.getCurrentProjPath() + '/' + vulName
+            for files in os.walk(imagePath):
+                evidencias.append('')
+                for file in files[2]:
+                    if file.endswith('.jpg'):
+                        image = open(str(imagePath + '/' + file), 'rb')
+                        data = image.read()
+                        image.close()
+                        zout.writestr(str(filename + file), data)
+                        rels = rels.replace('rels', '<Relationship Id = "rId%d" Type = "http://schemas.openxmlformats.org/officeDocument/2006/relationships/image" Target = "media/%s"/>rels' % (num, file))
+                        text = imageText.replace('rId20', 'rId%d' % num)
+                        evidencias[i] = evidencias[i] + text
+                        num += 1
+                i += 1
+        rels = rels.replace('rels', '')
+        zout.writestr(relsFile, rels)
+
+        return evidencias
 
 
     def sortVul(self, vetor):
