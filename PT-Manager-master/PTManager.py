@@ -1087,7 +1087,7 @@ class BurpExtender(IBurpExtender, ITab, IMessageEditorController, AbstractTableM
                                         tmp = tmp.replace("Riscos", self.htmlEscape(vulnerabilidades[i][0].getRisk()))
                                         tmp = tmp.replace("Referencias",
                                                           self.htmlEscape(vulnerabilidades[i][0].getReferences()))
-                                        tmp = tmp.replace("URL", self.htmlEscape(vulnerabilidades[i][0].getAffectedURL()))
+                                        tmp = tmp.replace("$URL", self.htmlEscape(vulnerabilidades[i][0].getAffectedURL()))
                                         tmp = tmp.replace("IMAGEM", evidencias[vuln] + "IMAGEM")
 
                                         if vulnerabilidades[i][0].getSeverity() == "Critical":
