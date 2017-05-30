@@ -589,7 +589,7 @@ class BurpExtender(IBurpExtender, ITab, IMessageEditorController, AbstractTableM
         if self.reportType.getSelectedItem() == "XLSX":
             path = self.reportToXLS()
         if self.reportType.getSelectedItem() == "DOCX":
-            templates = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe()))) + "/templates"
+            templates = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe()))) + "/templates_pt_manager"
             path = self.generateReportFromDocxTemplate(templates, "newfile.docx")
         if self.reportType.getSelectedItem() == "XML":
             path = self.generateXMLReport()
@@ -1024,10 +1024,11 @@ class BurpExtender(IBurpExtender, ITab, IMessageEditorController, AbstractTableM
 
 
     def generateReportFromDocxTemplate(self, templatePath, newZipName):
-        zipname = templatePath + '/Inicio.docx'
+        zipname = templatePath + '/inicio.docx'
         filename = 'word/document.xml'
         newZipName = self.getCurrentProjPath() + "/" + newZipName
         with zipfile.ZipFile(zipname, 'r') as zin:
+            print zin
             with zipfile.ZipFile(newZipName, 'w') as zout:
                 zout.comment = zin.comment
                 vulnerabilidades = self.sortVul(self._log)
@@ -1047,24 +1048,39 @@ class BurpExtender(IBurpExtender, ITab, IMessageEditorController, AbstractTableM
 
                         xml_content = zin.read(item.filename)
                         result = re.findall("(.*)<w:body>(?:.*)<\/w:body>(.*)", xml_content)[0]
+                        print result
                         newXML = result[0]
+                        print newXML
+                        print newXML
                         templateBody = re.findall("<w:body>(.*)<\/w:body>", xml_content)[0]
                         newBody = ""
                         newXML = newXML + templateBody.decode('utf-8')
-                        newXML = newXML.replace("Aplicacao", self.projName.getText())
+                        #newXML = newXML.replace("Aplicacao", self.projName.getText())
 
                         document = self.getXMLDoc(self.getCurrentProjPath() + "/project.xml")
                         nodeList = document.getDocumentElement().getChildNodes()
                         start = str(nodeList.item(4).getTextContent())
-                        newXML = newXML.replace("DD/MM/AA1", start)
-                        newXML = newXML.replace("DD/MM/AA2", time.strftime("%d/%m/%Y"))
+                        newXML = newXML.replace("DD/MM/AAA1", start)
+                        newXML = newXML.replace("DD/MM/AAA2", time.strftime("%d/%m/%Y"))
 
                         #with open(str(templatePath + '/' + 'images.xml'), 'r') as imageXML:
                         #    imageText = imageXML.read()
 
                         contadores = [0, 0, 0, 0, 0]
-
+                        mudar_sec_vuln = ''
                         for i in range(0, len(vulnerabilidades)):
+                            sec_vuln = templatePath + '/divisor_vuln_' + vulnerabilidades[i][0].getSeverity() + '.docx'
+                            if mudar_sec_vuln != vulnerabilidades[i][0].getSeverity():
+                                with zipfile.ZipFile(sec_vuln, 'r') as ztemp:
+                                    for item in ztemp.infolist():
+                                        if item.filename == filename:
+                                            xml_content = ztemp.read(item.filename)
+                                            result = re.findall("(.*)<w:body>(?:.*)<\/w:body>(.*)", xml_content)[0]
+                                            templateBody = re.findall("<w:body>(.*)<\/w:body>", xml_content)[0]
+                                            tmp = templateBody.decode('utf-8')
+                                            newBody = newBody + tmp
+                                            mudar_sec_vuln = vulnerabilidades[i][0].getSeverity()
+
                             template = templatePath + '/' + vulnerabilidades[i][0].getSeverity() + '.docx'
                             resumo = templatePath + '/resumo_' + vulnerabilidades[i][0].getSeverity() + '.docx'
                             with zipfile.ZipFile(template, 'r') as ztemp:
@@ -1075,20 +1091,20 @@ class BurpExtender(IBurpExtender, ITab, IMessageEditorController, AbstractTableM
                                         templateBody = re.findall("<w:body>(.*)<\/w:body>", xml_content)[0]
 
                                         tmp = templateBody.decode('utf-8')
-                                        tmp = tmp.replace("Titulo_vulnerabilidade", vulnerabilidades[i][0].getName())
+                                        tmp = tmp.replace("titulo_da_vulnerabilidade", vulnerabilidades[i][0].getName())
                                         tmp = tmp.replace("Numero_CWE",
                                                           self.htmlEscape(vulnerabilidades[i][0].getCWENumber()))
-                                        tmp = tmp.replace("Titulo_CWE",
+                                        tmp = tmp.replace("titulo_da_cwe",
                                                           self.htmlEscape(vulnerabilidades[i][0].getCWETitle()))
-                                        tmp = tmp.replace("Descricao",
+                                        tmp = tmp.replace("desc_vuln",
                                                           self.htmlEscape(vulnerabilidades[i][0].getDescription()))
-                                        tmp = tmp.replace("Mitigacoes",
+                                        tmp = tmp.replace("desc_miti",
                                                           self.htmlEscape(vulnerabilidades[i][0].getMitigation()))
-                                        tmp = tmp.replace("Riscos", self.htmlEscape(vulnerabilidades[i][0].getRisk()))
-                                        tmp = tmp.replace("Referencias",
+                                        tmp = tmp.replace("desc_risk", self.htmlEscape(vulnerabilidades[i][0].getRisk()))
+                                        tmp = tmp.replace("desc_ref",
                                                           self.htmlEscape(vulnerabilidades[i][0].getReferences()))
-                                        tmp = tmp.replace("$URL", self.htmlEscape(vulnerabilidades[i][0].getAffectedURL()))
-                                        tmp = tmp.replace("IMAGEM", evidencias[vuln] + "IMAGEM")
+                                        tmp = tmp.replace("url_ativo_host", self.htmlEscape(vulnerabilidades[i][0].getAffectedURL()))
+                                        #tmp = tmp.replace("IMAGEM", evidencias[vuln] + "IMAGEM")
 
                                         if vulnerabilidades[i][0].getSeverity() == "Critical":
                                             contadores[0] += 1
@@ -1114,18 +1130,18 @@ class BurpExtender(IBurpExtender, ITab, IMessageEditorController, AbstractTableM
                                         result = re.findall("(.*)<w:body>(?:.*)<\/w:body>(.*)", xml_content)[0]
                                         templateBody = re.findall("<w:body>(.*)<\/w:body>", xml_content)[0]
                                         tmp = templateBody.decode('utf-8')
-                                        tmp = tmp.replace("Titulo", vulnerabilidades[i][0].getName())
-                                        tmp = tmp.replace("Riscos", vulnerabilidades[i][0].getRisk())
+                                        tmp = tmp.replace("titulo_da_vulnerabilidade", vulnerabilidades[i][0].getName())
+                                        tmp = tmp.replace("desc_risk", vulnerabilidades[i][0].getRisk())
                                         newXML = newXML + tmp
 
                             newBody = newBody.replace("IMAGEM", "")
                             vuln += 1
 
-                        newXML = newXML.replace("$$C", str(contadores[0]))
-                        newXML = newXML.replace("$$H", str(contadores[1]))
-                        newXML = newXML.replace("$$M", str(contadores[2]))
-                        newXML = newXML.replace("$$B", str(contadores[3]))
-                        newXML = newXML.replace("$$U", str(contadores[4]))
+                        newXML = newXML.replace("n_critical", str(contadores[0]))
+                        newXML = newXML.replace("n_high", str(contadores[1]))
+                        newXML = newXML.replace("n_medium", str(contadores[2]))
+                        newXML = newXML.replace("n_low", str(contadores[3]))
+                        newXML = newXML.replace("n_info", str(contadores[4]))
 
                         zipname = templatePath + '/Inicio_continuacao.docx'
                         with zipfile.ZipFile(zipname, 'r') as zres:
@@ -1139,18 +1155,18 @@ class BurpExtender(IBurpExtender, ITab, IMessageEditorController, AbstractTableM
 
                         newXML = newXML + newBody
 
-                        zipname = templatePath + '/Fim.docx'
+                        zipname = templatePath + '/final_relat_pt.docx'
                         with zipfile.ZipFile(zipname, 'r') as zres:
                             for item in zres.infolist():
                                 if item.filename == filename:
                                     xml_content = zres.read(item.filename)
+                                    print xml_content
                                     result = re.findall("(.*)<w:body>(?:.*)<\/w:body>(.*)", xml_content)[0]
                                     templateBody = re.findall("<w:body>(.*)<\/w:body>", xml_content)[0]
                                     tmp = templateBody.decode('utf-8')
                                     newXML = newXML + tmp
 
                         newXML = newXML + result[1]
-
 
 
         with zipfile.ZipFile(newZipName, mode='a', compression=zipfile.ZIP_DEFLATED) as zf:
@@ -1168,8 +1184,8 @@ class BurpExtender(IBurpExtender, ITab, IMessageEditorController, AbstractTableM
         evidencias = []
         i = 0
 
-        with open(str(templatePath + '/' + 'images.xml'), 'r') as imageXML:
-            imageText = imageXML.read()
+        #with open(str(templatePath + '/' + 'images.xml'), 'r') as imageXML:
+            #imageText = imageXML.read()
 
         for vulnerabilidade in vulnerabilidades:
             vulName = self.clearStr(vulnerabilidade[0].getName())
