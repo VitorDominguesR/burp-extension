@@ -342,7 +342,7 @@ class BurpExtender(IBurpExtender, ITab, IMessageEditorController, AbstractTableM
         reportLabel = JLabel("Generate Report:")
         reportLabel.setBounds(10, 375, 140, 30)
 
-        types = ["HTML", "DOCX", "XLSX", "XML"]
+        types = ["HTML", "DOCX", "XLSX", "XML", "DOCX(Externo)"]
         self.reportType = JComboBox(types)
         self.reportType.setBounds(10, 400, 140, 30)
 
@@ -590,7 +590,11 @@ class BurpExtender(IBurpExtender, ITab, IMessageEditorController, AbstractTableM
             path = self.reportToXLS()
         if self.reportType.getSelectedItem() == "DOCX":
             templates = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe()))) + "/templates_pt_manager"
-            path = self.generateReportFromDocxTemplate(templates, "newfile.docx")
+            path = self.generateReportFromDocxTemplate(templates, self.projName.getText()+".docx")
+        if self.reportType.getSelectedItem() == "DOCX(Externo)":
+            templates = os.path.dirname(
+                os.path.abspath(inspect.getfile(inspect.currentframe()))) + "/templates_pt_manager"
+            path = self.generateReportFromDocxTemplate(templates, self.projName.getText() + "_externo.docx",externo=True)
         if self.reportType.getSelectedItem() == "XML":
             path = self.generateXMLReport()
 
@@ -1023,8 +1027,11 @@ class BurpExtender(IBurpExtender, ITab, IMessageEditorController, AbstractTableM
         return cgi.escape(data,quote=True)
 
 
-    def generateReportFromDocxTemplate(self, templatePath, newZipName):
-        zipname = templatePath + '/inicio.docx'
+    def generateReportFromDocxTemplate(self, templatePath, newZipName, externo = False):
+        if externo:
+            zipname = templatePath + '/inicio_externo.docx'
+        else:
+            zipname = templatePath + '/inicio.docx'
         filename = 'word/document.xml'
         newZipName = self.getCurrentProjPath() + "/" + newZipName
         with zipfile.ZipFile(zipname, 'r') as zin:
@@ -1154,17 +1161,17 @@ class BurpExtender(IBurpExtender, ITab, IMessageEditorController, AbstractTableM
                                     newXML = newXML + tmp
 
                         newXML = newXML + newBody
-
-                        zipname = templatePath + '/final_relat_pt.docx'
-                        with zipfile.ZipFile(zipname, 'r') as zres:
-                            for item in zres.infolist():
-                                if item.filename == filename:
-                                    xml_content = zres.read(item.filename)
-                                    print xml_content
-                                    result = re.findall("(.*)<w:body>(?:.*)<\/w:body>(.*)", xml_content)[0]
-                                    templateBody = re.findall("<w:body>(.*)<\/w:body>", xml_content)[0]
-                                    tmp = templateBody.decode('utf-8')
-                                    newXML = newXML + tmp
+                        if not externo:
+                            zipname = templatePath + '/final_relat_pt.docx'
+                            with zipfile.ZipFile(zipname, 'r') as zres:
+                                for item in zres.infolist():
+                                    if item.filename == filename:
+                                        xml_content = zres.read(item.filename)
+                                        print xml_content
+                                        result = re.findall("(.*)<w:body>(?:.*)<\/w:body>(.*)", xml_content)[0]
+                                        templateBody = re.findall("<w:body>(.*)<\/w:body>", xml_content)[0]
+                                        tmp = templateBody.decode('utf-8')
+                                        newXML = newXML + tmp
 
                         newXML = newXML + result[1]
 
