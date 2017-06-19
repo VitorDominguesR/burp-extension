@@ -1050,7 +1050,7 @@ class BurpExtender(IBurpExtender, ITab, IMessageEditorController, AbstractTableM
                         zout.writestr(item, zin.read(item.filename))
                     else:
 
-                        evidencias = self.saveImages(zin, zout, vulnerabilidades, templatePath)
+                        #evidencias = self.saveImages(zin, zout, vulnerabilidades, templatePath)
                         vuln = 0
 
                         xml_content = zin.read(item.filename)
