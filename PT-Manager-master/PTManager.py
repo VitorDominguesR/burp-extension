@@ -89,7 +89,7 @@ class BurpExtender(IBurpExtender, ITab, IMessageEditorController, AbstractTableM
         self._helpers = callbacks.getHelpers()
 
         # set our extension name
-        callbacks.setExtensionName("PT Vulnerabilities Manager")
+        callbacks.setExtensionName("EGV Vulnerabilities Manager")
 
         self.config = SafeConfigParser()
         self.createSection('projects')
@@ -119,8 +119,8 @@ class BurpExtender(IBurpExtender, ITab, IMessageEditorController, AbstractTableM
         if self.projPath.getText() != None:
             self.loadVulnerabilities(self.projPath.getText())
 
-        print "Thank you for installing PT Vulnerabilities Manager v1.0 extension"
-        print "by Barak Tawily\n\nGithub:\nhttps://github.com/Quitten/PT-Manager\n\n\n"
+        print "Thank you for installing EGV Vulnerabilities Manager\n(PT Manager based extension by Barak Tawily)"
+        print "by Vitor Domingues Ribeiro\n\nOriginal Github Project:\nhttps://github.com/Quitten/PT-Manager\n\n\n"
         print "Disclaimer:\nThis extension might create folders and files in your hardisk which might be declared as sensitive information, make sure you are creating projects under encrypted partition"
         return
 
@@ -600,7 +600,7 @@ class BurpExtender(IBurpExtender, ITab, IMessageEditorController, AbstractTableM
 
         n = JOptionPane.showConfirmDialog(None,
                                           "Report generated successfuly:\n%s\nWould you like to open it?" % (path),
-                                          "PT Manager", JOptionPane.YES_NO_OPTION)
+                                          "EGV Manager", JOptionPane.YES_NO_OPTION)
         if n == JOptionPane.YES_OPTION:
             self.openFolderOrFile(path)
 
@@ -1491,7 +1491,7 @@ class BurpExtender(IBurpExtender, ITab, IMessageEditorController, AbstractTableM
             tree.write(vulnDirPath + '/vulnerability.xml')
         elif os.path.exists(vulnDirPath + '/vulnerability.xml'):
             n = JOptionPane.showConfirmDialog(None,
-                                              "This Vulnerability has been already added. Do you want to update it ?","PT Manager", JOptionPane.YES_NO_OPTION)
+                                              "This Vulnerability has been already added. Do you want to update it ?","EGV Manager", JOptionPane.YES_NO_OPTION)
             if n == JOptionPane.YES_OPTION:
                 tree.write(vulnDirPath + '/vulnerability.xml')
         if boolRepo and n == JOptionPane.YES_OPTION:
@@ -1545,7 +1545,7 @@ class BurpExtender(IBurpExtender, ITab, IMessageEditorController, AbstractTableM
         responses = invocation.getSelectedMessages();
         if responses > 0:
             ret = LinkedList()
-            requestMenuItem = JMenuItem("Send to PT Manager");
+            requestMenuItem = JMenuItem("Send to EGV Manager");
             requestMenuItem.addActionListener(handleMenuItems(self, responses[0], "request"))
             ret.add(requestMenuItem);
             return (ret);
@@ -1555,7 +1555,7 @@ class BurpExtender(IBurpExtender, ITab, IMessageEditorController, AbstractTableM
     # implement ITab
     #
     def getTabCaption(self):
-        return "PT Manager"
+        return "EGV Manager"
 
     def getUiComponent(self):
         return self._splitpane
