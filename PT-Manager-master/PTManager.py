@@ -1035,7 +1035,7 @@ class BurpExtender(IBurpExtender, ITab, IMessageEditorController, AbstractTableM
         filename = 'word/document.xml'
         newZipName = self.getCurrentProjPath() + "/" + newZipName
         with zipfile.ZipFile(zipname, 'r') as zin:
-            print zin
+            #print zin
             with zipfile.ZipFile(newZipName, 'w') as zout:
                 zout.comment = zin.comment
                 vulnerabilidades = self.sortVul(self._log)
@@ -1043,14 +1043,14 @@ class BurpExtender(IBurpExtender, ITab, IMessageEditorController, AbstractTableM
                 for item in zin.infolist():
                     #print item.filename
                     if item.filename == 'word/_rels/document.xml.rels':
-                        #evidencias = self.saveImages(zin, zout, vulnerabilidades, templatePath)
+                        #sevidencias = self.saveImages(zin, zout, vulnerabilidades, templatePath)
                         #vuln = 0
                         continue
                     if item.filename != filename:
                         zout.writestr(item, zin.read(item.filename))
                     else:
 
-                        #evidencias = self.saveImages(zin, zout, vulnerabilidades, templatePath)
+                        evidencias = self.saveImages(zin, zout, vulnerabilidades, templatePath)
                         vuln = 0
 
                         xml_content = zin.read(item.filename)
@@ -1111,7 +1111,7 @@ class BurpExtender(IBurpExtender, ITab, IMessageEditorController, AbstractTableM
                                         tmp = tmp.replace("desc_ref",
                                                           self.htmlEscape(vulnerabilidades[i][0].getReferences()))
                                         tmp = tmp.replace("url_ativo_host", self.htmlEscape(vulnerabilidades[i][0].getAffectedURL()))
-                                        #tmp = tmp.replace("IMAGEM", evidencias[vuln] + "IMAGEM")
+                                        tmp = tmp.replace("IMAGEM", evidencias[vuln] + "IMAGEM")
 
                                         if vulnerabilidades[i][0].getSeverity() == "Critical":
                                             contadores[0] += 1
