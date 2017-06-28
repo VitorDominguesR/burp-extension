@@ -1274,7 +1274,7 @@ class BurpExtender(IBurpExtender, ITab, IMessageEditorController, AbstractTableM
         if returnVal == JFileChooser.APPROVE_OPTION:
             try:
                 testeDir = u"%s" % self.chooser.getSelectedFile().getAbsolutePath()
-                projPath = testeDir.encode('latin1') + "/PTManager"
+                projPath = testeDir.encode('latin1') + "/%s"%self.projName.getText()+ "/PTManager"
                 if not os.path.exists(projPath):
                     os.makedirs(projPath)
                 else:
@@ -1480,7 +1480,7 @@ class BurpExtender(IBurpExtender, ITab, IMessageEditorController, AbstractTableM
         self._lock.acquire()
         row = self._log.size()
         vulnObject = vulnerability(self.vulnName.getText(), self.threatLevel.getSelectedItem(),
-                                   self.descriptionString.getText(), self.mitigationStr.getText(), colorTxt, self.riskStr.getText(),self.cweNumberStr.getText(), self.cweTitleStr.getText(),self.refStr.getText(),self.getAffectedUrlStr.getText())#, self.owaspClassCombo.getSelectedItem())
+                                   self.descriptionString.getText(), self.mitigationStr.getText(), colorTxt, self.riskStr.getText(),self.cweNumberStr.getText(), self.cweTitleStr.getText(),self.refStr.getText(),self.getAffectedUrlStr.getText(), self.owaspClassCombo.getSelectedItem())
         if not boolRepo:
             self._log.add(vulnObject)
             self.fireTableRowsInserted(row, row)
@@ -1654,7 +1654,7 @@ class BurpExtender(IBurpExtender, ITab, IMessageEditorController, AbstractTableM
         self.riskStr.setText(vulnObject.getRisk())
         self.refStr.setText(vulnObject.getReferences())
         self.getAffectedUrlStr.setText(vulnObject.getAffectedURL())
-
+        #print vulnObject.getOwaspClass()
         if vulnObject.getOwaspClass() == "" or vulnObject.getOwaspClass() == None:
             self.owaspClassCombo.setSelectedItem("OWASP:")
         else:
