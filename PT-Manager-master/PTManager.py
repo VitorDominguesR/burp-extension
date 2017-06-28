@@ -185,6 +185,20 @@ class BurpExtender(IBurpExtender, ITab, IMessageEditorController, AbstractTableM
         self.colorCombo = JComboBox(colors);
         self.colorCombo.setBounds(465, 45, 100, 30)
 
+        owasp_classfication = ["OWASP:",
+                               "A1 - Injection",
+                               "A2 - Broken Autentication and Session Management",
+                               "A3 - XSS",
+                               "A4 - Insecure Direct Reference Object",
+                               "A5 - Security Missconfiguration",
+                               "A6 - Sensitive Data Exposure",
+                               "A7 - Missing Function Level Access Control",
+                               "A8 - CSRF",
+                               "A9 - Using Components With Known Vulnerabilities",
+                               "A10 - Unvalidate Redirects and Foward"]
+        self.owaspClassCombo = JComboBox(owasp_classfication)
+        self.owaspClassCombo.setBounds(310, 45, 100, 30)
+
         mitigationLabel = JLabel("Mitigation:")
         mitigationLabel.setBounds(10, 340, 100, 30)
 
@@ -279,6 +293,7 @@ class BurpExtender(IBurpExtender, ITab, IMessageEditorController, AbstractTableM
         self.pnl.add(self.threatLevel)
         self.pnl.add(self.newVulnBtn)
         self.pnl.add(self.colorCombo)
+        self.pnl.add(self.owaspClassCombo)
 
     def initSelectVulnTabs(self):
 
@@ -505,11 +520,19 @@ class BurpExtender(IBurpExtender, ITab, IMessageEditorController, AbstractTableM
                     cweNum = nodeList.item(7).getTextContent()
                     references = nodeList.item(8).getTextContent()
                     try:
-                        affectedURL = nodeList.item(9).getTextContent()
+                        owasp_class = nodeList.item(9).getTextContent()
                     except:
-                       affectedURL = ''
-                       pass
-                    vulnObject = vulnerability(vulnName, severity, description, mitigation, color,risk,cweNum,cweTitle, references, affectedURL)
+                        owasp_class = ''
+                        pass
+
+                    try:
+                        affectedURL = nodeList.item(10).getTextContent()
+                    except:
+                        affectedURL = ''
+                        pass
+
+                    #print owasp_class
+                    vulnObject = vulnerability(vulnName, severity, description, mitigation, color,risk,cweNum,cweTitle, references, affectedURL, owasp_class)
                     self._lock.acquire()
                     row = self._log.size()
                     self._log.add(vulnObject)
@@ -535,12 +558,19 @@ class BurpExtender(IBurpExtender, ITab, IMessageEditorController, AbstractTableM
             cweNum = nodeList.item(7).getTextContent()
             references = nodeList.item(8).getTextContent()
             try:
-                affectedURL = nodeList.item(9).getTextContent()
+                owasp_class = nodeList.item(9).getTextContent()
+            except:
+                owasp_class = ''
+                pass
+
+            try:
+                affectedURL = nodeList.item(10).getTextContent()
             except:
                 affectedURL = ''
                 pass
+            #print owasp_class
             vulnObject = vulnerability(vulnName, severity, description, mitigation, color, risk, cweNum, cweTitle,
-                                       references, affectedURL)
+                                       references, affectedURL, owasp_class)
 
             self._lock.acquire()
             row = self._log.size()
@@ -621,6 +651,8 @@ class BurpExtender(IBurpExtender, ITab, IMessageEditorController, AbstractTableM
                 tag_nomevuln.text = vulnerabilidade['nome_vuln'].decode('latin1')
                 tag_severidade = ET.SubElement(tag_vuln, 'severidade')
                 tag_severidade.text = vulnerabilidade['severidade'].decode('latin1')
+                tag_owasp_class = ET.SubElement(tag_vuln, 'owasp_class')
+                tag_owasp_class.text = vulnerabilidade['owasp_class'].decode('latin1')
                 tag_urls = ET.SubElement(tag_vuln, 'urls')
                 for url in vulnerabilidade['url_afetada']:  # vetor
                     tag_url = ET.SubElement(tag_urls, 'url')
@@ -678,14 +710,15 @@ class BurpExtender(IBurpExtender, ITab, IMessageEditorController, AbstractTableM
             cweNum = u"%s"%str(self._log.get(i).getCWENumber())
             affectedUrlList = [u"%s"%x for x in self._log.get(i).getAffectedURL().split()]
             severity = {"Unclassified":u"informativa", "Critical":u"Crítica", "High":u"Alta", "Medium":u"Média", "Low":u"Baixa"}
-
+            owasp_class = u"%s"%str(self._log.get(i).getOwaspClass())
             vulnDict = {'cwe': cweNum, 'nome_vuln': name,
                         'severidade': severity[self._log.get(i).getSeverity()],
                         'url_afetada': affectedUrlList, 'descricao': description,
                         'risco':risk,
                         'resultados': img_and_text,
                         'recomendacao': mitigation,
-                        'referencias': references}
+                        'referencias': references,
+                        'owasp_class': owasp_class}
 
             # print vulnDict['descricao'].encode('utf8')
             self.vetorVuln.append(vulnDict)
@@ -986,6 +1019,7 @@ class BurpExtender(IBurpExtender, ITab, IMessageEditorController, AbstractTableM
         self.mitigationStr.setText("")
         self.colorCombo.setSelectedIndex(0)
         self.threatLevel.setSelectedIndex(0)
+        self.owaspClassCombo.setSelectedIndex(0)
         self.cweTitleStr.setText("")
         self.cweNumberStr.setText("CWE-")
         self.refStr.setText("")
@@ -1098,7 +1132,7 @@ class BurpExtender(IBurpExtender, ITab, IMessageEditorController, AbstractTableM
                                         templateBody = re.findall("<w:body>(.*)<\/w:body>", xml_content)[0]
 
                                         tmp = templateBody.decode('utf-8')
-                                        tmp = tmp.replace("titulo_da_vulnerabilidade", vulnerabilidades[i][0].getName())
+                                        tmp = tmp.replace("titulo_da_vulnerabilidade",vulnerabilidades[i][0].getOwaspClass().split(" ")[0] +" - " + vulnerabilidades[i][0].getName())
                                         tmp = tmp.replace("Numero_CWE",
                                                           self.htmlEscape(vulnerabilidades[i][0].getCWENumber()))
                                         tmp = tmp.replace("titulo_da_cwe",
@@ -1446,7 +1480,7 @@ class BurpExtender(IBurpExtender, ITab, IMessageEditorController, AbstractTableM
         self._lock.acquire()
         row = self._log.size()
         vulnObject = vulnerability(self.vulnName.getText(), self.threatLevel.getSelectedItem(),
-                                   self.descriptionString.getText(), self.mitigationStr.getText(), colorTxt, self.riskStr.getText(),self.cweNumberStr.getText(), self.cweTitleStr.getText(),self.refStr.getText(),self.getAffectedUrlStr.getText())
+                                   self.descriptionString.getText(), self.mitigationStr.getText(), colorTxt, self.riskStr.getText(),self.cweNumberStr.getText(), self.cweTitleStr.getText(),self.refStr.getText(),self.getAffectedUrlStr.getText())#, self.owaspClassCombo.getSelectedItem())
         if not boolRepo:
             self._log.add(vulnObject)
             self.fireTableRowsInserted(row, row)
@@ -1471,11 +1505,13 @@ class BurpExtender(IBurpExtender, ITab, IMessageEditorController, AbstractTableM
         cweTitle = ET.SubElement(xml,"cweTiTle")
         cweNum = ET.SubElement(xml,"cweNum")
         references = ET.SubElement(xml,"references")
+        owasp_class = ET.SubElement(xml, "owasp_class")
         if not boolRepo:
             affectedURL = ET.SubElement(xml, "affectedURLS")
             affectedURL.text = self.getAffectedUrlStr.getText()
         name.text = self.vulnName.getText()
         severity.text = self.threatLevel.getSelectedItem()
+        owasp_class.text = self.owaspClassCombo.getSelectedItem()
         description.text = self.descriptionString.getText()
         mitigation.text = self.mitigationStr.getText()
         risk.text = self.riskStr.getText()
@@ -1618,6 +1654,11 @@ class BurpExtender(IBurpExtender, ITab, IMessageEditorController, AbstractTableM
         self.riskStr.setText(vulnObject.getRisk())
         self.refStr.setText(vulnObject.getReferences())
         self.getAffectedUrlStr.setText(vulnObject.getAffectedURL())
+
+        if vulnObject.getOwaspClass() == "" or vulnObject.getOwaspClass() == None:
+            self.owaspClassCombo.setSelectedItem("OWASP:")
+        else:
+            self.owaspClassCombo.setSelectedItem(vulnObject.getOwaspClass())
 
         if vulnObject.getColor() == "" or vulnObject.getColor() == None:
             self.colorCombo.setSelectedItem("Color:")
@@ -1797,7 +1838,7 @@ class projectChangeHandler(ActionListener):
 
 
 class vulnerability():
-    def __init__(self, name, severity, description, mitigation, color, risk, cweNum, cweTitle, refs, url=None):
+    def __init__(self, name, severity, description, mitigation, color, risk, cweNum, cweTitle, refs, url=None, owasp_class=None):
         self.name = name
         self.severity = severity
         self.description = description
@@ -1808,6 +1849,7 @@ class vulnerability():
         self.cweTitle = cweTitle
         self.refs = refs
         self.url = url
+        self.owasp_class = owasp_class
 
 
 
@@ -1840,6 +1882,9 @@ class vulnerability():
 
     def getAffectedURL(self):
         return self.url
+
+    def getOwaspClass(self):
+        return self.owasp_class
 
 class handleMenuItems(ActionListener):
     def __init__(self, extender, messageInfo, menuName):
