@@ -1240,8 +1240,8 @@ class BurpExtender(IBurpExtender, ITab, IMessageEditorController, AbstractTableM
                         image.close()
                         zout.writestr(str(filename + file), data)
                         rels = rels.replace('rels', '<Relationship Id = "rId%d" Type = "http://schemas.openxmlformats.org/officeDocument/2006/relationships/image" Target = "media/%s"/>rels' % (num, file))
-                        text = imageText.replace('rId20', 'rId%d' % num)
-                        evidencias[i] = evidencias[i] + text
+                        #text = imageText.replace('rId20', 'rId%d' % num)
+                        evidencias[i] = evidencias[i] #+ text
                         num += 1
                 i += 1
         rels = rels.replace('rels', '')
