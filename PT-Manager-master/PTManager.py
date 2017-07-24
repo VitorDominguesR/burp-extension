@@ -620,11 +620,11 @@ class BurpExtender(IBurpExtender, ITab, IMessageEditorController, AbstractTableM
             path = self.reportToXLS()
         if self.reportType.getSelectedItem() == "DOCX":
             templates = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe()))) + "/templates_pt_manager"
-            path = self.generateReportFromDocxTemplate(templates, self.projName.getText()+".docx")
+            path = self.generateReportFromDocxTemplate(templates, 'relatorio_'+self.projName.getText()+".docx")
         if self.reportType.getSelectedItem() == "DOCX(Externo)":
             templates = os.path.dirname(
                 os.path.abspath(inspect.getfile(inspect.currentframe()))) + "/templates_pt_manager"
-            path = self.generateReportFromDocxTemplate(templates, self.projName.getText() + "_externo.docx",externo=True)
+            path = self.generateReportFromDocxTemplate(templates, 'relatorio_'+self.projName.getText() + "_externo.docx",externo=True)
         if self.reportType.getSelectedItem() == "XML":
             path = self.generateXMLReport()
 
