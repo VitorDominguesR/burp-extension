@@ -619,12 +619,49 @@ class BurpExtender(IBurpExtender, ITab, IMessageEditorController, AbstractTableM
         if self.reportType.getSelectedItem() == "XLSX":
             path = self.reportToXLS()
         if self.reportType.getSelectedItem() == "DOCX":
-            templates = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe()))) + "/templates_pt_manager"
-            path = self.generateReportFromDocxTemplate(templates, 'relatorio_'+self.projName.getText()+".docx")
+            vulnerabilidades = self.sortVul(self._log)
+            no_urls_listed = []
+            for x in vulnerabilidades:
+                if x[0].getAffectedURL() == '':
+                    no_urls_listed.append(x[0].getName())
+            if len(no_urls_listed)>0:
+                n = JOptionPane.showConfirmDialog(None,
+                                              "Those vulnerabilities (%s) are without URL's. Do you want to continue ?" % (",".join(no_urls_listed)),
+                                              "EGV Manager", JOptionPane.YES_NO_OPTION)
+                if n == JOptionPane.YES_OPTION:
+                    templates = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe()))) + "/templates_pt_manager"
+                    path = self.generateReportFromDocxTemplate(templates, 'relatorio_'+self.projName.getText()+".docx")
+                else:
+                    self.popup(u'Relatório não foi gerado')
+            else:
+                templates = os.path.dirname(
+                    os.path.abspath(inspect.getfile(inspect.currentframe()))) + "/templates_pt_manager"
+                path = self.generateReportFromDocxTemplate(templates,
+                                                           'relatorio_' + self.projName.getText() + ".docx")
+
         if self.reportType.getSelectedItem() == "DOCX(Externo)":
-            templates = os.path.dirname(
-                os.path.abspath(inspect.getfile(inspect.currentframe()))) + "/templates_pt_manager"
-            path = self.generateReportFromDocxTemplate(templates, 'relatorio_'+self.projName.getText() + "_externo.docx",externo=True)
+            vulnerabilidades = self.sortVul(self._log)
+            no_urls_listed = []
+            for x in vulnerabilidades:
+                if x[0].getAffectedURL() == '':
+                    no_urls_listed.append(x[0].getName())
+            if len(no_urls_listed) > 0:
+                n = JOptionPane.showConfirmDialog(None,
+                                                  "Those vulnerabilities (%s) are without URL's. Do you want to continue ?" % (
+                                                  ",".join(no_urls_listed)),
+                                                  "EGV Manager", JOptionPane.YES_NO_OPTION)
+                if n == JOptionPane.YES_OPTION:
+                    templates = os.path.dirname(
+            os.path.abspath(inspect.getfile(inspect.currentframe()))) + "/templates_pt_manager"
+                    path = self.generateReportFromDocxTemplate(templates, 'relatorio_'+self.projName.getText() + "_externo.docx",externo=True)
+                else:
+                    self.popup(u'Relatório não foi gerado')
+            else:
+                templates = os.path.dirname(
+                    os.path.abspath(inspect.getfile(inspect.currentframe()))) + "/templates_pt_manager"
+                path = self.generateReportFromDocxTemplate(templates,
+                                                           'relatorio_' + self.projName.getText() + "_externo.docx",
+                                                           externo=True)
         if self.reportType.getSelectedItem() == "XML":
             path = self.generateXMLReport()
 
@@ -1072,7 +1109,7 @@ class BurpExtender(IBurpExtender, ITab, IMessageEditorController, AbstractTableM
             #print zin
             with zipfile.ZipFile(newZipName, 'w') as zout:
                 zout.comment = zin.comment
-                vulnerabilidades = self.sortVul(self._log)
+                #vulnerabilidades = self.sortVul(self._log)
 
                 for item in zin.infolist():
                     #print item.filename
@@ -1086,7 +1123,7 @@ class BurpExtender(IBurpExtender, ITab, IMessageEditorController, AbstractTableM
 
                         evidencias = self.saveImages(zin, zout, vulnerabilidades, templatePath)
                         vuln = 0
-
+                        vulnerabilidades = self.sortVul(self._log)
                         xml_content = zin.read(item.filename)
                         result = re.findall("(.*)<w:body>(?:.*)<\/w:body>(.*)", xml_content)[0]
                         print result
