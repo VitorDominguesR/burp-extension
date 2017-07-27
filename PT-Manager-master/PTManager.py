@@ -665,10 +665,10 @@ class BurpExtender(IBurpExtender, ITab, IMessageEditorController, AbstractTableM
         if self.reportType.getSelectedItem() == "XML":
             path = self.generateXMLReport()
 
-        n = JOptionPane.showConfirmDialog(None,
-                                          "Report generated successfuly:\n%s\nWould you like to open it?" % (path),
+        y = JOptionPane.showConfirmDialog(None,
+                                          "Report generated successfuly:\n%s\nWould you like to open it?" % ('Project %s'%self.projName.getText()),
                                           "EGV Manager", JOptionPane.YES_NO_OPTION)
-        if n == JOptionPane.YES_OPTION:
+        if y == JOptionPane.YES_OPTION:
             self.openFolderOrFile(path)
 
     def generateXMLReport(self):
