@@ -1120,10 +1120,9 @@ class BurpExtender(IBurpExtender, ITab, IMessageEditorController, AbstractTableM
                     if item.filename != filename:
                         zout.writestr(item, zin.read(item.filename))
                     else:
-
+                        vulnerabilidades = self.sortVul(self._log)
                         evidencias = self.saveImages(zin, zout, vulnerabilidades, templatePath)
                         vuln = 0
-                        vulnerabilidades = self.sortVul(self._log)
                         xml_content = zin.read(item.filename)
                         result = re.findall("(.*)<w:body>(?:.*)<\/w:body>(.*)", xml_content)[0]
                         print result
