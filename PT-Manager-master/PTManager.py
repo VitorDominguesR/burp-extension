@@ -614,13 +614,11 @@ class BurpExtender(IBurpExtender, ITab, IMessageEditorController, AbstractTableM
         transformer.transform(source, result)
 
     def generateReport(self, event):
-        n = None
+        n = 's'
         if self.reportType.getSelectedItem() == "HTML":
             path = self.reportToHTML()
-            n = 1
         if self.reportType.getSelectedItem() == "XLSX":
             path = self.reportToXLS()
-            n = 1
         if self.reportType.getSelectedItem() == "DOCX":
             vulnerabilidades = self.sortVul(self._log)
             no_urls_listed = []
@@ -636,8 +634,8 @@ class BurpExtender(IBurpExtender, ITab, IMessageEditorController, AbstractTableM
                     path = self.generateReportFromDocxTemplate(templates, 'relatorio_'+self.projName.getText()+".docx")
                 else:
                     self.popup(u'Relatório não foi gerado')
+                    n = 'n'
             else:
-                n=1
                 templates = os.path.dirname(
                     os.path.abspath(inspect.getfile(inspect.currentframe()))) + "/templates_pt_manager"
                 path = self.generateReportFromDocxTemplate(templates,
@@ -660,8 +658,8 @@ class BurpExtender(IBurpExtender, ITab, IMessageEditorController, AbstractTableM
                     path = self.generateReportFromDocxTemplate(templates, 'relatorio_'+self.projName.getText() + "_externo.docx",externo=True)
                 else:
                     self.popup(u'Relatório não foi gerado')
+                    n ='n'
             else:
-                n=1
                 templates = os.path.dirname(
                     os.path.abspath(inspect.getfile(inspect.currentframe()))) + "/templates_pt_manager"
                 path = self.generateReportFromDocxTemplate(templates,
@@ -669,7 +667,9 @@ class BurpExtender(IBurpExtender, ITab, IMessageEditorController, AbstractTableM
                                                            externo=True)
         if self.reportType.getSelectedItem() == "XML":
             path = self.generateXMLReport()
-        if n != None and n != JOptionPane.NO_OPTION:
+        print n
+        if n == 's':
+            print n
             y = JOptionPane.showConfirmDialog(None,
                                               "Report generated successfuly:\n%s\nWould you like to open it?" % ('Project %s'%self.projName.getText()),
                                               "EGV Manager", JOptionPane.YES_NO_OPTION)
