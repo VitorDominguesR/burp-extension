@@ -351,7 +351,7 @@ class BurpExtender(IBurpExtender, ITab, IMessageEditorController, AbstractTableM
         self.projName.setBounds(140, 50, 320, 30)
         self.projName.getDocument().addDocumentListener(projTextChanged(self))
 
-        detailsLabel = JLabel("Details:")
+        detailsLabel = JLabel("Scope:")
         detailsLabel.setBounds(10, 120, 140, 30)
 
         reportLabel = JLabel("Generate Report:")
@@ -614,7 +614,7 @@ class BurpExtender(IBurpExtender, ITab, IMessageEditorController, AbstractTableM
         transformer.transform(source, result)
 
     def generateReport(self, event):
-        n = 's'
+        choice = 's'
         if self.reportType.getSelectedItem() == "HTML":
             path = self.reportToHTML()
         if self.reportType.getSelectedItem() == "XLSX":
@@ -634,7 +634,7 @@ class BurpExtender(IBurpExtender, ITab, IMessageEditorController, AbstractTableM
                     path = self.generateReportFromDocxTemplate(templates, 'relatorio_'+self.projName.getText()+".docx")
                 else:
                     self.popup(u'Relatório não foi gerado')
-                    n = 'n'
+                    choice = 'n'
             else:
                 templates = os.path.dirname(
                     os.path.abspath(inspect.getfile(inspect.currentframe()))) + "/templates_pt_manager"
@@ -658,7 +658,7 @@ class BurpExtender(IBurpExtender, ITab, IMessageEditorController, AbstractTableM
                     path = self.generateReportFromDocxTemplate(templates, 'relatorio_'+self.projName.getText() + "_externo.docx",externo=True)
                 else:
                     self.popup(u'Relatório não foi gerado')
-                    n ='n'
+                    choice ='n'
             else:
                 templates = os.path.dirname(
                     os.path.abspath(inspect.getfile(inspect.currentframe()))) + "/templates_pt_manager"
@@ -667,9 +667,9 @@ class BurpExtender(IBurpExtender, ITab, IMessageEditorController, AbstractTableM
                                                            externo=True)
         if self.reportType.getSelectedItem() == "XML":
             path = self.generateXMLReport()
-        print n
-        if n == 's':
-            print n
+        #print n
+        if choice == 's':
+            #print n
             y = JOptionPane.showConfirmDialog(None,
                                               "Report generated successfuly:\n%s\nWould you like to open it?" % ('Project %s'%self.projName.getText()),
                                               "EGV Manager", JOptionPane.YES_NO_OPTION)
@@ -1144,6 +1144,8 @@ class BurpExtender(IBurpExtender, ITab, IMessageEditorController, AbstractTableM
                         start = str(nodeList.item(4).getTextContent())
                         newXML = newXML.replace("DD/MM/AAA1", start)
                         newXML = newXML.replace("DD/MM/AAA2", time.strftime("%d/%m/%Y"))
+                        newXML = newXML.replace("$$details_content", u"%s".encode('utf8') % self.projDetails.getText())
+
 
                         #with open(str(templatePath + '/' + 'images.xml'), 'r') as imageXML:
                         #    imageText = imageXML.read()
