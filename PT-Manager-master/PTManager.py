@@ -310,9 +310,6 @@ class BurpExtender(IBurpExtender, ITab, IMessageEditorController, AbstractTableM
         chooseVulnsPathButton = JButton("Browse...", actionPerformed=self.chooseVulnsPath)
         chooseVulnsPathButton.setBounds(25, 10, 100, 30)
 
-        getAffectedURL = JLabel("Insert Affected URL:")
-        getAffectedURL.setBounds(25, 125, 150, 30)
-
         self.getAffectedUrlStr = JTextArea("", 5, 30)
         self.getAffectedUrlStr.setWrapStyleWord(True);
         self.getAffectedUrlStr.setLineWrap(True)
@@ -320,6 +317,14 @@ class BurpExtender(IBurpExtender, ITab, IMessageEditorController, AbstractTableM
         affectedUrlStrScroll = JScrollPane(self.getAffectedUrlStr)
         affectedUrlStrScroll.setBounds(140, 125, 555, 80)
         affectedUrlStrScroll.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED)
+
+        x_getAffectedUrl = self.getAffectedUrlStr.getBounds().x - 130
+
+
+        getAffectedURL = JLabel("Insert Affected URL:")
+        getAffectedURL.setBounds(x_getAffectedUrl, 125, 150, 30)
+
+        #print x_getAffectedUrl
 
         self.insertAffectedUrlBtn = JButton("Insert URL's", actionPerformed=self.addVuln)
         self.insertAffectedUrlBtn.setBounds(25, 165, 100, 30)
